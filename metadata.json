@@ -1,0 +1,6 @@
+{
+  "name": "Owen4Nails",
+  "description": "Professional nail art, manicures, pedicures, foot care, and beauty consultations at 6 Lobito Crescent, Wuse 2, Abuja, Nigeria.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
