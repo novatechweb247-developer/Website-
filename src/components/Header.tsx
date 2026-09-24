@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, MessageSquare, Phone } from 'lucide-react';
+import { motion, AnimatePresence, Variants } from 'motion/react';
+import { MessageSquare, Phone, MapPin, Sparkles } from 'lucide-react';
 import { BUSINESS_INFO, getWhatsAppUrl } from '../data/business';
 
-interface HeaderProps {
-  activeSection?: string;
-}
-
-export const Header: React.FC<HeaderProps> = () => {
+export const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -19,11 +16,11 @@ export const Header: React.FC<HeaderProps> = () => {
   }, []);
 
   const navLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'Services', href: '#services' },
-    { name: 'Gallery', href: '#gallery' },
-    { name: 'About', href: '#about' },
-    { name: 'Contact', href: '#contact' },
+    { name: 'Home', href: '#home', tag: '01' },
+    { name: 'Services', href: '#services', tag: '02' },
+    { name: 'Gallery', href: '#gallery', tag: '03' },
+    { name: 'About', href: '#about', tag: '04' },
+    { name: 'Contact', href: '#contact', tag: '05' },
   ];
 
   const handleNavClick = (href: string) => {
@@ -32,6 +29,52 @@ export const Header: React.FC<HeaderProps> = () => {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  // Explicit Variants typing for Motion v12
+  const menuVariants: Variants = {
+    closed: {
+      opacity: 0,
+      scaleY: 0.95,
+      y: -20,
+      transition: {
+        duration: 0.35,
+        ease: 'easeOut',
+        staggerChildren: 0.05,
+        staggerDirection: -1,
+      },
+    },
+    open: {
+      opacity: 1,
+      scaleY: 1,
+      y: 0,
+      transition: {
+        duration: 0.45,
+        ease: 'easeOut',
+        staggerChildren: 0.08,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const linkVariants: Variants = {
+    closed: {
+      opacity: 0,
+      x: -25,
+      y: -10,
+      rotateX: -30,
+      transition: { duration: 0.25 },
+    },
+    open: {
+      opacity: 1,
+      x: 0,
+      y: 0,
+      rotateX: 0,
+      transition: {
+        duration: 0.4,
+        ease: 'easeOut',
+      },
+    },
   };
 
   return (
@@ -43,7 +86,8 @@ export const Header: React.FC<HeaderProps> = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        {/* Zone 1: Brand Title (Single text element wordmark) */}
+        
+        {/* Zone 1: Brand Title */}
         <a
           href="#home"
           onClick={(e) => {
@@ -88,73 +132,116 @@ export const Header: React.FC<HeaderProps> = () => {
           </a>
         </div>
 
-        {/* Mobile Menu Button */}
-        <div className="flex md:hidden items-center gap-2">
+        {/* Mobile Controls & Morphing Hamburger Icon */}
+        <div className="flex md:hidden items-center gap-3">
           <a
             href={getWhatsAppUrl()}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2 text-xs font-semibold text-white bg-[#1A1817] rounded-full"
+            className="p-2 text-xs font-semibold text-white bg-[#1A1817] rounded-full shadow-xs"
             aria-label="Book on WhatsApp"
           >
             <MessageSquare className="w-4 h-4 text-[#E8D5C8]" />
           </a>
+
+          {/* Morphing Hamburger Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-[#1A1817] hover:text-[#A67C52] transition-colors rounded-lg focus:outline-none"
-            aria-label="Toggle Navigation Menu"
+            className="relative w-10 h-10 flex flex-col items-center justify-center rounded-full bg-[#F3EFE9] border border-[#E8D5C8] focus:outline-none overflow-hidden"
+            aria-label="Toggle Menu"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            <motion.span
+              animate={mobileMenuOpen ? { rotate: 45, y: 6 } : { rotate: 0, y: -5 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="absolute w-5 h-[2px] bg-[#1A1817] rounded-full"
+            />
+            <motion.span
+              animate={mobileMenuOpen ? { opacity: 0, x: -10 } : { opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute w-5 h-[2px] bg-[#1A1817] rounded-full"
+            />
+            <motion.span
+              animate={mobileMenuOpen ? { rotate: -45, y: -6 } : { rotate: 0, y: 5 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="absolute w-5 h-[2px] bg-[#1A1817] rounded-full"
+            />
           </button>
         </div>
       </div>
 
-      {/* Mobile Drawer Navigation */}
-      {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-[60px] bg-[#FAF8F5] border-b border-[#E8D5C8] shadow-lg animate-in slide-in-from-top-2 duration-200">
-          <div className="px-6 pt-4 pb-6 space-y-4">
-            <div className="flex flex-col space-y-3 border-b border-[#E8D5C8]/40 pb-4">
-              {navLinks.map((link) => (
+      {/* Animated Mobile Menu Drawer */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            key="mobile-drawer"
+            initial="closed"
+            animate="open"
+            exit="closed"
+            variants={menuVariants}
+            className="md:hidden fixed inset-x-0 top-[64px] bg-[#FAF8F5]/98 backdrop-blur-xl border-b border-[#E8D5C8] shadow-2xl origin-top overflow-hidden"
+          >
+            <div className="px-6 pt-6 pb-8 space-y-6">
+              
+              {/* Menu Links with Staggered Fold-In / Out Animation */}
+              <div className="flex flex-col space-y-3 border-b border-[#E8D5C8]/60 pb-6">
+                {navLinks.map((link) => (
+                  <motion.div key={link.name} variants={linkVariants}>
+                    <a
+                      href={link.href}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleNavClick(link.href);
+                      }}
+                      className="group flex items-center justify-between py-2 text-2xl font-serif font-bold text-[#1A1817] hover:text-[#A67C52] transition-colors"
+                    >
+                      <span className="flex items-center gap-3">
+                        <Sparkles className="w-4 h-4 text-[#A67C52] opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <span>{link.name}</span>
+                      </span>
+                      <span className="text-xs font-sans text-[#A67C52] font-semibold tracking-wider">
+                        {link.tag}
+                      </span>
+                    </a>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Action Buttons with Motion Entrance */}
+              <motion.div
+                variants={linkVariants}
+                className="space-y-3 pt-1"
+              >
                 <a
-                  key={link.name}
-                  href={link.href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavClick(link.href);
-                  }}
-                  className="text-base font-medium text-[#1A1817] hover:text-[#A67C52] py-1 transition-colors"
+                  href={getWhatsAppUrl("Hello Owen4Nails, I would like to book an appointment.")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-white bg-[#1A1817] rounded-full shadow-md"
                 >
-                  {link.name}
+                  <MessageSquare className="w-4 h-4 text-[#E8D5C8]" />
+                  <span>Book via WhatsApp</span>
                 </a>
-              ))}
-            </div>
 
-            <div className="pt-2 space-y-2">
-              <a
-                href={getWhatsAppUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 text-xs font-semibold uppercase tracking-wider text-white bg-[#1A1817] rounded-full shadow-xs"
+                <a
+                  href={`tel:${BUSINESS_INFO.phone}`}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 text-xs font-semibold text-[#1A1817] bg-[#F3EFE9] border border-[#E8D5C8] rounded-full"
+                >
+                  <Phone className="w-3.5 h-3.5 text-[#A67C52]" />
+                  <span>Call {BUSINESS_INFO.phone}</span>
+                </a>
+              </motion.div>
+
+              <motion.div
+                variants={linkVariants}
+                className="flex items-center justify-center gap-2 text-xs text-[#6B6560] pt-2"
               >
-                <MessageSquare className="w-4 h-4 text-[#E8D5C8]" />
-                <span>Book via WhatsApp</span>
-              </a>
+                <MapPin className="w-3.5 h-3.5 text-[#A67C52]" />
+                <span>{BUSINESS_INFO.location.shortAddress}</span>
+              </motion.div>
 
-              <a
-                href={`tel:${BUSINESS_INFO.phone}`}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-xs font-medium text-[#1A1817] bg-[#F3EFE9] border border-[#E8D5C8] rounded-full"
-              >
-                <Phone className="w-3.5 h-3.5 text-[#A67C52]" />
-                <span>Call {BUSINESS_INFO.phone}</span>
-              </a>
             </div>
-
-            <div className="pt-2 text-center text-xs text-[#6B6560]">
-              {BUSINESS_INFO.location.shortAddress}
-            </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };
